@@ -5,6 +5,8 @@ import { Avatar, message } from "antd";
 import React, { useEffect, useState } from "react";
 import CurrentUserInfo from "./current-user-info";
 import { usePathname } from "next/navigation";
+import { useDispatch, useSelector } from "react-redux";
+import { SetCurrentUser, UserState } from "@/redux/userSlice";
 
 function Header() {
   const pathname = usePathname();
@@ -13,7 +15,12 @@ function Header() {
   if (isPublicRoute) return null;
 
   // eslint-disable-next-line react-hooks/rules-of-hooks
-  const [currentUser, setCurrentUser] = useState<UserType | null>(null);
+  const dispatch = useDispatch();
+  // eslint-disable-next-line react-hooks/rules-of-hooks
+  const { currentUserData }: UserState = useSelector(
+    (state: any) => state.user
+  );
+
   const [showCurrentUserInfo, setShowCurrentUserInfo] =
     // eslint-disable-next-line react-hooks/rules-of-hooks
     useState<boolean>(false);
@@ -23,7 +30,7 @@ function Header() {
       if (response.error) {
         throw new Error(response.error);
       }
-      setCurrentUser(response);
+      dispatch(SetCurrentUser(response as UserType));
     } catch (error: any) {
       message.error(error.message);
     }
@@ -38,16 +45,15 @@ function Header() {
         <h1 className="text-2xl font-bold text-primary">{"{next...chat}"}</h1>
       </div>
       <div className="gap-5 flex items-center">
-        <span className="text-sm">{currentUser?.name}</span>
+        <span className="text-sm">{currentUserData?.name}</span>
         <Avatar
           className="cursor-pointer"
           onClick={() => setShowCurrentUserInfo(true)}
-          src={currentUser?.profilePicture}
+          src={currentUserData?.profilePicture}
         />
       </div>
       {showCurrentUserInfo && (
         <CurrentUserInfo
-          currentUser={currentUser}
           setShowCurrentUserInfo={setShowCurrentUserInfo}
           showCurrentUserInfo={showCurrentUserInfo}
         />

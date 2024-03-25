@@ -4,18 +4,22 @@ import React, { useState } from "react";
 import dayjs from "dayjs";
 import { useClerk } from "@clerk/nextjs";
 import { useRouter } from "next/navigation";
+import { UserState } from "@/redux/userSlice";
+import { useSelector } from "react-redux";
 
 function CurrentUserInfo({
-  currentUser,
   setShowCurrentUserInfo,
   showCurrentUserInfo,
 }: {
-  currentUser: UserType | null;
   setShowCurrentUserInfo: React.Dispatch<React.SetStateAction<boolean>>;
   showCurrentUserInfo: boolean;
 }) {
   const router = useRouter();
   const [loading, setLoading] = useState<boolean>(false);
+  const { currentUserData }: UserState = useSelector(
+    (state: any) => state.user
+  );
+
   const getProperty = (key: string, value: string) => {
     return (
       <div className="flex flex-col">
@@ -44,11 +48,11 @@ function CurrentUserInfo({
       onClose={() => setShowCurrentUserInfo(false)}
       title="profile"
     >
-      {currentUser && (
+      {currentUserData && (
         <div className="flex flex-col gap-5">
           <div className="flex flex-col gap-5 justify-center items-center">
             <img
-              src={currentUser.profilePicture}
+              src={currentUserData.profilePicture}
               alt="profile"
               className="w-28 h-28 rounded-full"
             />
@@ -58,12 +62,12 @@ function CurrentUserInfo({
           </div>
           <Divider className="my-1 border-gray-200" />
           <div className="flex flex-col gap-5">
-            {getProperty("Name", currentUser.name)}
-            {getProperty("Username", currentUser.userName)}
-            {getProperty("Id", currentUser._id)}
+            {getProperty("Name", currentUserData.name)}
+            {getProperty("Username", currentUserData.userName)}
+            {getProperty("Id", currentUserData._id)}
             {getProperty(
               "Joined on",
-              dayjs(currentUser.createdAt).format("DD MM YYYY hh mm A")
+              dayjs(currentUserData.createdAt).format("DD MM YYYY hh mm A")
             )}
           </div>
           <div className="mt-5">
