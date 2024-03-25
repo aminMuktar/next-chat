@@ -4,8 +4,10 @@ import React, { useState } from "react";
 import dayjs from "dayjs";
 import { useClerk } from "@clerk/nextjs";
 import { useRouter } from "next/navigation";
-import { UserState } from "@/redux/userSlice";
-import { useSelector } from "react-redux";
+import { SetCurrentUser, UserState } from "@/redux/userSlice";
+import { useDispatch, useSelector } from "react-redux";
+import { UploadImageToFirebaseAndReturnUrl } from "@/helpers/image-upload";
+import { updateUserProfile } from "@/server-actions/users";
 
 function CurrentUserInfo({
   setShowCurrentUserInfo,
@@ -20,7 +22,7 @@ function CurrentUserInfo({
     (state: any) => state.user
   );
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
-
+  const dispatch = useDispatch();
   const getProperty = (key: string, value: string) => {
     return (
       <div className="flex flex-col">
@@ -43,7 +45,28 @@ function CurrentUserInfo({
       setLoading(false);
     }
   };
-  const onProfilePictureUpdate = async () => {};
+  const onProfilePictureUpdate = async () => {
+    try {
+      setLoading(true);
+      const url: string = await UploadImageToFirebaseAndReturnUrl(
+        selectedFile!
+      );
+      const response = await updateUserProfile(currentUserData?._id!, {
+        profilePicture: url,
+      });
+      dispatch(SetCurrentUser(response));
+      message.success("profile picture updated successfully");
+      setShowCurrentUserInfo(false);
+      if (response.error) {
+        throw new Error(response.error);
+      }
+    } catch (error: any) {
+      message.error(error.message);
+    } finally {
+      setLoading(false);
+      setSelectedFile(null);
+    }
+  };
   return (
     <Drawer
       open={showCurrentUserInfo}
@@ -95,7 +118,7 @@ function CurrentUserInfo({
             <Button
               className="w-full"
               block
-              loading={loading}
+              loading={loading && !selectedFile}
               onClick={() => onLogout()}
             >
               Logout
