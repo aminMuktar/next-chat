@@ -1,5 +1,5 @@
 import { UserType } from "@/interfaces";
-import { Button, Divider, Drawer, message } from "antd";
+import { Button, Divider, Drawer, message, Upload } from "antd";
 import React, { useState } from "react";
 import dayjs from "dayjs";
 import { useClerk } from "@clerk/nextjs";
@@ -19,6 +19,7 @@ function CurrentUserInfo({
   const { currentUserData }: UserState = useSelector(
     (state: any) => state.user
   );
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
 
   const getProperty = (key: string, value: string) => {
     return (
@@ -42,6 +43,7 @@ function CurrentUserInfo({
       setLoading(false);
     }
   };
+  const onProfilePictureUpdate = async () => {};
   return (
     <Drawer
       open={showCurrentUserInfo}
@@ -51,14 +53,24 @@ function CurrentUserInfo({
       {currentUserData && (
         <div className="flex flex-col gap-5">
           <div className="flex flex-col gap-5 justify-center items-center">
-            <img
-              src={currentUserData.profilePicture}
-              alt="profile"
-              className="w-28 h-28 rounded-full"
-            />
-            <span className="text-gray-500 cursor-pointer">
+            {!selectedFile && (
+              <img
+                src={currentUserData.profilePicture}
+                alt="profile"
+                className="w-28 h-28 rounded-full"
+              />
+            )}
+            <Upload
+              className="cursor-pointer"
+              listType={selectedFile ? "picture-circle" : "text"}
+              maxCount={1}
+              beforeUpload={(file) => {
+                setSelectedFile(file);
+                return false;
+              }}
+            >
               change profile picture
-            </span>
+            </Upload>
           </div>
           <Divider className="my-1 border-gray-200" />
           <div className="flex flex-col gap-5">
@@ -70,7 +82,16 @@ function CurrentUserInfo({
               dayjs(currentUserData.createdAt).format("DD MM YYYY hh mm A")
             )}
           </div>
-          <div className="mt-5">
+          <div className="mt-5 flex flex-col gap-5">
+            <Button
+              className="w-full"
+              block
+              disabled={!selectedFile}
+              loading={loading}
+              onClick={() => onProfilePictureUpdate()}
+            >
+              Update profile
+            </Button>
             <Button
               className="w-full"
               block
