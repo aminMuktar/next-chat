@@ -11,7 +11,7 @@ export interface UserType{
 
 export interface ChatType{
   _id: string;
-  user: UserType[];
+  users: UserType[];
   createdBy: UserType;
   lastMessage: MessageType;
   isGroupChat:boolean;

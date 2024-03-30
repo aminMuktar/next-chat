@@ -33,9 +33,16 @@ export const GetCurrentUserFromMongoDB = async ()=>{
   }
 }
 
-// export const GetAllUsers=async()=>{
-
-// }
+export const GetAllUsers=async()=>{
+  try {
+    const users = await userModel.find({})
+    return JSON.parse(JSON.stringify(users))
+  } catch (error: any) {
+    return {
+      error: error.message,
+    }
+  }
+}
 
 export const updateUserProfile = async(userId:string,payload: any)=>{
   try {
